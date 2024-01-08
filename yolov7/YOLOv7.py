@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import onnxruntime
 
+
 from yolov7.utils import xywh2xyxy, nms, draw_detections
 
 
@@ -20,10 +21,10 @@ class YOLOv7:
         return self.detect_objects(image)
 
     def initialize_model(self, path):
-        self.session = onnxruntime.InferenceSession(path,
-                                                    providers=['CUDAExecutionProvider',
-                                                               'CPUExecutionProvider'])
-        # Get model info
+        self.session = onnxruntime.InferenceSession(path, providers=['OpenVINOExecutionProvider'], provider_options=[{"device_type" : "GPU_FP32"}])
+        #self.session = onnxruntime.InferenceSession(path, providers=['OpenVINOExecutionProvider'])
+        # Get model info.5, iou_thres=0.5)
+
         self.get_input_details()
         self.get_output_details()
 
@@ -65,7 +66,7 @@ class YOLOv7:
         start = time.perf_counter()
         outputs = self.session.run(self.output_names, {self.input_names[0]: input_tensor})
 
-        print(f"Inference time: {(time.perf_counter() - start)*1000:.2f} ms")
+        #print(f"Inference time: {(time.perf_counter() - start)*1000:.2f} ms")
         return outputs
 
     def process_output(self, output):
